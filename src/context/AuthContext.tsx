@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import axios from 'axios';
+
 
 interface User {
   id: string;
@@ -100,62 +102,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    dispatch({ type: 'LOGIN_START' });
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication - in real app, this would be an API call
-      if (email && password.length >= 6) {
-        const user: User = {
-          id: Date.now().toString(),
-          email,
-          name: email.split('@')[0],
-          avatar: `https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100`,
-        };
-        
-        localStorage.setItem('user', JSON.stringify(user));
-        dispatch({ type: 'LOGIN_SUCCESS', payload: user });
-        return true;
-      } else {
-        dispatch({ type: 'LOGIN_FAILURE' });
-        return false;
-      }
-    } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE' });
-      return false;
-    }
-  };
+  dispatch({ type: 'LOGIN_START' });
+
+  try {
+    const res = await axios.post('http://localhost:5000/api/login', { email, password });
+    const user = res.data;
+
+    localStorage.setItem('user', JSON.stringify(user));
+    dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+    return true;
+  } catch (error) {
+    dispatch({ type: 'LOGIN_FAILURE' });
+    return false;
+  }
+};
 
   const signup = async (name: string, email: string, password: string): Promise<boolean> => {
-    dispatch({ type: 'SIGNUP_START' });
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock registration - in real app, this would be an API call
-      if (name && email && password.length >= 6) {
-        const user: User = {
-          id: Date.now().toString(),
-          email,
-          name,
-          avatar: `https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100`,
-        };
-        
-        localStorage.setItem('user', JSON.stringify(user));
-        dispatch({ type: 'SIGNUP_SUCCESS', payload: user });
-        return true;
-      } else {
-        dispatch({ type: 'SIGNUP_FAILURE' });
-        return false;
-      }
-    } catch (error) {
-      dispatch({ type: 'SIGNUP_FAILURE' });
-      return false;
-    }
-  };
+  dispatch({ type: 'SIGNUP_START' });
+
+  try {
+    const res = await axios.post('http://localhost:5000/api/signup', { name, email, password });
+    const user = res.data;
+
+    localStorage.setItem('user', JSON.stringify(user));
+    dispatch({ type: 'SIGNUP_SUCCESS', payload: user });
+    return true;
+  } catch (error) {
+    dispatch({ type: 'SIGNUP_FAILURE' });
+    return false;
+  }
+};
+
 
   const logout = () => {
     localStorage.removeItem('user');
